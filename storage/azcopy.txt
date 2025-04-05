@@ -1,0 +1,3 @@
+azcopy login --tenant-id "SUSTITUIR"
+
+azcopy copy "SUSTITUIR\2025.csv" "https://SUSTITUIR.dfs.core.windows.net/datalake/bronze/2025.csv"
