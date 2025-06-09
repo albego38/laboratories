@@ -1,0 +1,61 @@
+trigger: none  # Deshabilita triggers automáticos
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  terraformWorkingDir: 'infra'  # Carpeta donde está tu código Terraform
+
+stages:
+- stage: Terraform
+  jobs:
+  - job: Deploy
+    steps:
+
+    - checkout: self  # Clona el repositorio
+
+    # Instala la versión especificada de Terraform en el agente
+    - task: TerraformInstaller@0
+      displayName: 'Instalar Terraform'
+      inputs:
+        terraformVersion: '1.5.7'
+
+    # Inicializa Terraform con backend remoto en Azure Storage
+    - task: TerraformTaskV4@4
+      displayName: 'Inicializar Terraform'
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/$(terraformWorkingDir)'
+        backendServiceArm: 'SC'                         # Service Connection para backend
+        backendAzureRmResourceGroupName: 'rg-terraform' # Sustituir rg del storage
+        backendAzureRmStorageAccountName: 'storagename' # Sustituir Storage name
+        backendAzureRmContainerName: 'tfstates'
+        backendAzureRmKey: 'tf.tfstatespoke'
+
+    # Valida la configuración Terraform
+    - task: TerraformTaskV4@4
+      displayName: 'Validar Terraform'
+      inputs:
+        provider: 'azurerm'
+        command: 'validate'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/$(terraformWorkingDir)'
+
+    # Planifica los cambios a aplicar
+    - task: TerraformTaskV4@4
+      displayName: 'Planificar Terraform'
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/$(terraformWorkingDir)'
+        environmentServiceNameAzureRM: 'SC'  # Autenticación para Azure
+
+    # Aplica los cambios sin pedir confirmación
+    - task: TerraformTaskV4@4
+      displayName: 'Aplicar Terraform'
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/$(terraformWorkingDir)'
+        environmentServiceNameAzureRM: 'SC'
+        commandOptions: '--auto-approve'
