@@ -1,0 +1,45 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - notebooks/**
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  DATABRICKS_HOST: 'https://adb-xxxxx.x.azuredatabricks.net' # Sustituir
+  DATABRICKS_TOKEN: xxxx   # Sustituir
+
+stages:
+- stage: UploadToDatabricks
+  jobs:
+  - job: Upload
+    steps:
+
+    - checkout: self
+
+    # Instala Databricks CLI
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+        addToPath: true
+
+    - script: |
+        pip install databricks-cli
+      displayName: 'Instalar Databricks CLI'
+
+    # Configura el CLI con el token y URL del workspace
+    - script: |
+        mkdir -p ~/.databricks
+        echo "[DEFAULT]" > ~/.databricks/config
+        echo "host = $(DATABRICKS_HOST)" >> ~/.databricks/config
+        echo "token = $(DATABRICKS_TOKEN)" >> ~/.databricks/config
+      displayName: 'Configurar Databricks CLI'
+
+    # Sube el contenido del directorio notebooks/ al workspace
+    - script: |
+        databricks workspace import_dir notebooks /Shared/notebooks --overwrite
+      displayName: 'Subir notebooks al workspace'
