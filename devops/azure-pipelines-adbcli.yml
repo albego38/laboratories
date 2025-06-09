@@ -9,6 +9,7 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+# Deberian ser variables con secret. Aqui solamente para el laboratorio
 variables:
   DATABRICKS_HOST: 'https://adb-xxxxx.x.azuredatabricks.net' # Sustituir
   DATABRICKS_TOKEN: xxxx   # Sustituir
