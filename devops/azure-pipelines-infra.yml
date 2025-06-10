@@ -29,7 +29,7 @@ stages:
         workingDirectory: '$(System.DefaultWorkingDirectory)/$(terraformWorkingDir)'
         backendServiceArm: 'SC'                         # Service Connection para backend
         backendAzureRmResourceGroupName: 'rg-devops'    # Sustituir rg del storage
-        backendAzureRmStorageAccountName: 'backendAzureRmuserId' # Sustituir Storage name
+        backendAzureRmStorageAccountName: 'backendARMuserId' # Sustituir Storage name
         backendAzureRmContainerName: 'tfstates'
         backendAzureRmKey: 'tf.tfstatespoke'
 
